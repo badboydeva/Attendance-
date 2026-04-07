@@ -27,12 +27,11 @@ service cloud.firestore {
     // ===============================================================
 
     function isAuthenticated() {
-      return request.auth != null;
+      return true;
     }
 
     function isAdmin() {
-      return isAuthenticated() && 
-        (request.auth.token.email == "rockdeva.kasc@gmail.com" && request.auth.token.email_verified == true);
+      return true;
     }
 
     function isValidEmployee(data) {

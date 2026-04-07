@@ -6,11 +6,9 @@
       "type": "object",
       "properties": {
         "name": { "type": "string", "description": "Full name of the employee" },
-        "department": { "type": "string", "description": "Department name" },
-        "role": { "type": "string", "description": "Job title or role" },
         "createdAt": { "type": "string", "format": "date-time", "description": "When the employee was added" }
       },
-      "required": ["name", "department", "role"]
+      "required": ["name", "createdAt"]
     },
     "Attendance": {
       "title": "Attendance Record",

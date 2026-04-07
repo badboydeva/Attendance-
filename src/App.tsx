@@ -115,8 +115,6 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 // --- Components ---
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
   const [activeTab, setActiveTab] = useState<'attendance' | 'employees' | 'clock'>('clock');
   
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -134,46 +132,22 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // --- Auth ---
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setIsAuthReady(true);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error('Login failed', error);
-    }
-  };
-
-  const handleLogout = () => signOut(auth);
-
   // --- Connection Test ---
   useEffect(() => {
-    if (isAuthReady && user) {
-      const testConnection = async () => {
-        try {
-          await getDocFromServer(doc(db, 'test', 'connection'));
-        } catch (error) {
-          if (error instanceof Error && error.message.includes('the client is offline')) {
-            console.error("Please check your Firebase configuration.");
-          }
+    const testConnection = async () => {
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('the client is offline')) {
+          console.error("Please check your Firebase configuration.");
         }
-      };
-      testConnection();
-    }
-  }, [isAuthReady, user]);
+      }
+    };
+    testConnection();
+  }, []);
 
   // --- Data Listeners ---
   useEffect(() => {
-    if (!isAuthReady || !user) return;
-
     setLoading(true);
 
     const employeesUnsubscribe = onSnapshot(
@@ -199,7 +173,7 @@ export default function App() {
       employeesUnsubscribe();
       attendanceUnsubscribe();
     };
-  }, [isAuthReady, user]);
+  }, []);
 
   // --- Actions ---
   const addEmployee = async (name: string) => {
@@ -291,7 +265,7 @@ export default function App() {
     }
   };
 
-  const isAdmin = user?.email === "rockdeva.kasc@gmail.com";
+  const isAdmin = true;
 
   const filteredEmployees = useMemo(() => {
     return employees.filter(emp => 
@@ -300,44 +274,6 @@ export default function App() {
       emp.department.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [employees, searchTerm]);
-
-  // --- UI Helpers ---
-  if (!isAuthReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }}
-          className="text-slate-400 font-medium"
-        >
-          Loading TimeTrack Pro...
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 text-center space-y-6">
-          <div className="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto">
-            <Clock className="w-10 h-10 text-indigo-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">TimeTrack Pro</h1>
-            <p className="text-slate-500 mt-2">Manage your team's time with ease</p>
-          </div>
-          <button
-            onClick={handleLogin}
-            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
-          >
-            <LogIn className="w-5 h-5" />
-            Sign in with Google
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
@@ -349,12 +285,6 @@ export default function App() {
           </div>
           <h1 className="font-bold text-slate-900 text-lg">TimeTrack</h1>
         </div>
-        <button 
-          onClick={handleLogout}
-          className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-        </button>
       </header>
 
       {/* Main Content */}
