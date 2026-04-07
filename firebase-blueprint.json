@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "Employee": {
+      "title": "Employee",
+      "description": "A person working in the organization",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name of the employee" },
+        "department": { "type": "string", "description": "Department name" },
+        "role": { "type": "string", "description": "Job title or role" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the employee was added" }
+      },
+      "required": ["name", "department", "role"]
+    },
+    "Attendance": {
+      "title": "Attendance Record",
+      "description": "A record of an employee's work or break session",
+      "type": "object",
+      "properties": {
+        "employeeId": { "type": "string", "description": "Reference to the employee" },
+        "employeeName": { "type": "string", "description": "Cached name of the employee" },
+        "date": { "type": "string", "format": "date", "description": "The date of attendance (YYYY-MM-DD)" },
+        "startTime": { "type": "string", "format": "date-time", "description": "Time when the session started" },
+        "endTime": { "type": "string", "format": "date-time", "description": "Time when the session ended" },
+        "durationMinutes": { "type": "number", "description": "Total minutes for this session" },
+        "type": { "type": "string", "enum": ["work", "break"], "description": "Type of session" },
+        "status": { "type": "string", "enum": ["present", "late", "completed"], "description": "Status of the session" },
+        "parentSessionId": { "type": "string", "description": "Reference to the main work session if this is a break" }
+      },
+      "required": ["employeeId", "date", "startTime", "type"]
+    }
+  },
+  "firestore": {
+    "/employees/{employeeId}": {
+      "schema": "Employee",
+      "description": "Collection of organization employees"
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "Attendance",
+      "description": "Daily attendance logs for all employees"
+    }
+  }
+}
